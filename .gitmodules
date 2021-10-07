@@ -1,0 +1,3 @@
+[submodule "multimon-android"]
+	path = multimon-android
+	url = https://github.com/Maedrawd/multimon-android.git
