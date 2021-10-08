@@ -30,6 +30,6 @@ class DataConsumer {
     }
 
     interface DecodedTextListener {
-        fun onNewText(text: Char)
+        fun onNewText(letter: Char)
     }
 }
