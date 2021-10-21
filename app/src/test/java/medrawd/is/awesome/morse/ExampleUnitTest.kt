@@ -1,4 +1,4 @@
-package medrawd.`is`.awesome.morsecodedecoder
+package medrawd.`is`.awesome.morse
 
 import org.junit.Test
 

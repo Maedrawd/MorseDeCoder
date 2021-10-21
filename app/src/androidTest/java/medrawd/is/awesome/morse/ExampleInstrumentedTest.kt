@@ -1,4 +1,4 @@
-package medrawd.`is`.awesome.morsecodedecoder
+package medrawd.`is`.awesome.morse
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("medrawd.is.awesome.morsecodedecoder", appContext.packageName)
+        assertEquals("medrawd.is.awesome.morsecode", appContext.packageName)
     }
 }

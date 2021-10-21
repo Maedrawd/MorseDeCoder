@@ -8,7 +8,7 @@ android {
     compileSdk 30
 
     defaultConfig {
-        applicationId "medrawd.is.awesome.morsecodedecoder"
+        applicationId "medrawd.is.awesome.morsecode"
         minSdk 22
         targetSdk 30
         versionCode 1
@@ -42,8 +42,8 @@ android {
 }
 
 dependencies {
-    implementation project(":multimon")
 
+    implementation project(":multimon")
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'

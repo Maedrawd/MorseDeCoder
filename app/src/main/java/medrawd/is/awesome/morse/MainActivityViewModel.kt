@@ -1,10 +1,11 @@
-package medrawd.`is`.awesome.morsecodedecoder
+package medrawd.`is`.awesome.morse
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import medrawd.`is`.awesome.morse.decoder.DataConsumer
 
 class MainActivityViewModel: ViewModel() {
-    var decodedText = MutableLiveData("")
     var recording = MutableLiveData(false)
     lateinit var dataConsumer: DataConsumer
+    var decodedTextHolder = MutableLiveData(MessagesList())
 }

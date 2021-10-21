@@ -1,4 +1,4 @@
-package medrawd.`is`.awesome.morsecodedecoder
+package medrawd.`is`.awesome.morse
 
 import android.Manifest
 import android.content.res.ColorStateList
@@ -9,19 +9,23 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import medrawd.`is`.awesome.CheckPermissionResult
 import medrawd.`is`.awesome.PermissionHandler
 import medrawd.`is`.awesome.TAG
-import medrawd.`is`.awesome.morsecodedecoder.databinding.ActivityMainBinding
+import medrawd.`is`.awesome.morse.databinding.ActivityMainBinding
+import medrawd.`is`.awesome.morse.decoder.DataConsumer
+import medrawd.`is`.awesome.morse.encoder.MorseEncoder
 import medrawd.`is`.awesome.multimon.AudioInShort
-import java.util.*
+import androidx.recyclerview.widget.LinearLayoutManager
+
 
 class MainActivity : AppCompatActivity(), AudioInShort.MaxValueListener,
     DataConsumer.DecodedTextListener {
 
-    private var lastLetterRecievedAt: Long = 0
     private lateinit var binding: ActivityMainBinding
     private var dialog: AlertDialog? = null
+    val morseEncoder = MorseEncoder()
 
 
     val requestPermissionLauncher =
@@ -38,6 +42,15 @@ class MainActivity : AppCompatActivity(), AudioInShort.MaxValueListener,
         val viewModel: MainActivityViewModel by viewModels()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        binding.content.recyclerViewMessages.layoutManager = LinearLayoutManager(this)
+        binding.content.recyclerViewMessages.adapter = MessagesRecyclerViewAdapter(this)
+        viewModel.decodedTextHolder.observe(this, Observer { list ->
+            Log.d(TAG, "observer called on decodedTextHolder")
+            (binding.content.recyclerViewMessages.adapter as MessagesRecyclerViewAdapter).messages.merge(list)// TODO move to adapter and add change type detection
+            (binding.content.recyclerViewMessages.adapter as MessagesRecyclerViewAdapter).notifyDataSetChanged()//TODO optimize as above
+        })
+
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         binding.executePendingBindings()
@@ -53,14 +66,28 @@ class MainActivity : AppCompatActivity(), AudioInShort.MaxValueListener,
             }
         }
 
-        binding.content.pBar.setMax(Short.MAX_VALUE.toInt())
+        binding.content.pBar.max = Short.MAX_VALUE.toInt()
+        binding.content.sendButton.setOnClickListener {
+            val message = binding.content.messageEditText.text
+            morseEncoder.post(message)
+            binding.content.messageEditText.setText("")
+            viewModel.decodedTextHolder.value?.appendSent(message)
+            viewModel.decodedTextHolder.value = viewModel.decodedTextHolder.value
+        }
     }
 
     override fun onStop() {
         dialog?.dismiss()
         dialog = null
-        super.onStop()
+        super.onStop();
+    }
 
+    override fun onDestroy() {
+        val viewModel: MainActivityViewModel by viewModels()
+        if(viewModel.recording.value == true){
+            stopDataConsumer()
+        }
+        super.onDestroy()
     }
 
     private fun startListeningOrGetPermission() {
@@ -152,11 +179,9 @@ class MainActivity : AppCompatActivity(), AudioInShort.MaxValueListener,
     }
 
     override fun onNewText(letter: Char) {
-        val prevLetterRecievedAt = lastLetterRecievedAt
-        lastLetterRecievedAt = Date().time
-        val addNewLine =
-            (prevLetterRecievedAt == 0L || (prevLetterRecievedAt + 1500 < lastLetterRecievedAt))
         val viewModel: MainActivityViewModel by viewModels()
-        viewModel.decodedText.postValue((if (null != viewModel.decodedText.value) viewModel.decodedText.value else "") + (if (addNewLine) '\n' else "") + letter)
+
+        viewModel.decodedTextHolder.value?.appendReceived(""+letter)
+        viewModel.decodedTextHolder.postValue(viewModel.decodedTextHolder.value)
     }
 }
